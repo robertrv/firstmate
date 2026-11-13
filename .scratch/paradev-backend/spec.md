@@ -3,8 +3,8 @@
 > Status (2026-11-13): spike done. The UNVERIFIED list below is answered in
 > [`spike-findings.md`](spike-findings.md). Two results change this spec:
 > the CLI has native agent state, and `workspaces archive` deletes a worktree
-> folder even when Paradev did not create it. The second one reopens the
-> "who owns the worktree" decision (see [`issues/04`](issues/04-decide-worktree-ownership.md)).
+> folder even when Paradev did not create it. The second one reopened the
+> "who owns the worktree" decision, now resolved as Option B (see [`issues/04`](issues/04-decide-worktree-ownership.md)).
 > Work is tracked one ticket per file in [`issues/`](issues/).
 
 ## Goal

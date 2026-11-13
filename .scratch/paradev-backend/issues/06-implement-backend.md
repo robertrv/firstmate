@@ -2,7 +2,7 @@
 
 Status: needs-triage
 Type: task
-Blocked by: 03, 04, 05
+Blocked by: 03, 05
 
 Implement the adapter contract from `../spec.md` using the operation map in `../spike-findings.md`. Selected by `FM_BACKEND=paradev` or `config/backend`, explicit-only, never auto-detected, macOS only. Always pass `--json --local` and parse with `jq`.
 
@@ -10,4 +10,5 @@ Implement the adapter contract from `../spec.md` using the operation map in `../
 
 - spawn / send / peek / state / list-live / teardown / preflight implemented.
 - Teardown refuses unless Firstmate's landing checks pass, and verifies the recorded workspace id and worktree path before archive.
+- Tag every created workspace `firstmate`; list-live and recovery use only recorded ids, never the tag.
 - Metadata: `backend=paradev`, `workspace=`, `terminal=`, `worktree=`, `paradev_project=`.

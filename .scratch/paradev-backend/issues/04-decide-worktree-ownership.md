@@ -1,6 +1,6 @@
 # 04 Decide: who owns the crewmate worktree (Option A vs B)
 
-Status: needs-triage
+Status: resolved
 Type: grilling
 
 The spec picked Option A (Treehouse owns, Paradev adopts via `worktrees open`). The spike found:
@@ -16,3 +16,10 @@ Recommendation: Option B, modelled on `bin/backends/orca.sh`, with Firstmate's l
 1. Accept B for v1?
 2. Tag scheme: one `firstmate` tag, or `firstmate-<home>` per first mate home?
 3. Should the Captain workspace itself be tagged and excluded from list-live?
+
+## Decision (2026-11-13)
+
+1. **Option B.** Paradev owns crewmate worktrees, modelled on the Orca backend. Treehouse is not used for `backend=paradev`. Teardown runs Firstmate's landing checks, verifies the recorded workspace id and worktree path, then closes the terminal and archives.
+2. **One tag, `firstmate`, for every workspace Firstmate creates.** The tag is display only: it files workspaces into one sidebar folder. Ownership never comes from the tag. Every operation and recovery path uses the workspace and terminal ids recorded in task metadata, as Firstmate already requires ("never sweep a shared endpoint namespace"). Home separation, if secondmates are ever supported, comes from home-scoped workspace names via `bin/fm-backend-hometag-lib.sh` (as zellij does), not from extra tags.
+3. **The Captain workspace may carry the `firstmate` tag too**, so the whole crew sits in one folder. This is safe because list-live and recovery are metadata-driven: an untracked tagged workspace (the Captain, or one the user tags by hand) is never treated as a crewmate, so it is never steered or archived. Untagged workspaces in the same project are likewise ignored.
+4. Secondmate spawns are out of scope for v1 (Orca precedent).
