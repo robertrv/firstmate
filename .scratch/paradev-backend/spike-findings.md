@@ -74,3 +74,71 @@ proof on throwaway branches `spike/noprompt` and `spike/adopt` (both cleaned up)
 | list-live | `workspaces list --local --tag <tag> --json` (+ `snapshot --json` for terminal liveness) |
 | teardown | after Firstmate landing checks: `terminals close`, then `workspaces archive <ws>` (B). Under A see issue 04 |
 | focus/open | `workspaces open <ws>` or deep link `superset://v2-workspace/<ws>?terminalId=<t>` |
+
+## Manual crewmate lifecycle (issue 02)
+
+Date: 2026-11-13, after the issue 03 local hooks fix. Plain `workspaces create --agent claude`, no
+`--settings` workaround. All calls take `--local --json`; ids below are shortened.
+
+### Commands and JSON shapes
+
+| Step | Command | Result shape |
+|------|---------|--------------|
+| spawn | `workspaces create --local --project <p> --name fm-spike-02a --branch spike/02a --skip-branch-prefix --tag fm-spike --agent claude --prompt "..." --json` | `{workspace: {id, projectId, hostId, name, branch, type: "worktree", ...}, terminals: [], agents: [{ok, kind: "terminal", sessionId, label: "Claude"}], alreadyExists, url, webUrl}`. Record `workspace.id` and `agents[0].sessionId` (the terminal id). `worktreePath` is not in this reply; `workspaces list/get` has it. Without `--skip-branch-prefix` the project branch prefix is prepended. |
+| state | `agents explain --workspace <w> --terminal <t>` | `{terminalId, state, agentId, headline, because, details[], lastEventType, lastEventAt}` |
+| wait | `agents wait --workspace <w> --terminal <t> --until idle --timeout N` | `{terminalId, state, lastEventType}` |
+| transcript | `agents read --workspace <w> --terminal <t>` | `{harness: "claude", text: "User: ...\n\nAssistant: ..."}` |
+| screen | `terminals read ... --max-lines N` | `{terminalId, cols, rows, text}`. `text` is the visible screen, bottom-padded with blank lines, so a small `--max-lines` can return only the empty input box. Use `agents read` for answers and `terminals read` for dialogs. |
+| steer | `terminals send ... --text "..." --wait --until settled\|working --timeout N` | `{terminalId, submitted: true, state}` |
+| keys | `terminals send ... --keys esc` / `ctrl+c` / `ctrl+c,ctrl+c` / `enter` | `{terminalId, keys: <count>}` (no state) |
+| terminals | `terminals list --workspace <w>` | `{sessions: [{terminalId, workspaceId, createdAt, exited, exitCode, attached, title, customTitle}]}` |
+| close | `terminals close --workspace <w> --terminal <t>` | `{terminalId, status: "disposed"}` |
+| archive | `workspaces archive <w...>` | `{deleted: [ids], notFound: [], failed: [], warnings: []}` |
+| list-live | `workspaces list --tag fm-spike` | array of workspace rows; `tags` is a string (`"fm-spike"`), plus `worktreePath`, `worktreeExists`, `archivedAt` |
+| snapshot | `snapshot --workspace <w>` | `{workspaces: [{id, name, project, branch, terminals: [{id, title, agent: {id, state} \| null}], layout, layoutError}]}` |
+
+### Observed timeline (two crewmates at once, same tag)
+
+Both created in parallel (backgrounded `workspaces create`, 13 ms apart): no conflict, both listed
+under `--tag fm-spike` at once, both reached `working` (`Start`) at the first poll and `idle`
+(`Stop`) about 10 to 15 s later. Answers were correct (`## What it is`, the first Markdown heading of
+README.md).
+
+| Step | `agents explain` | `snapshot` | `workspaces list --tag` |
+|------|------------------|------------|-------------------------|
+| right after create | `working` / `Start` | terminal with `agent: {id: claude, state: working}`, title = prompt summary | both rows, `worktreeExists: true` |
+| turn done | `idle` / `Stop` | `agent.state: idle` (title spinner glyph stays) | unchanged |
+| follow-up `send --wait --until settled` | returned `{submitted: true, state: idle}` after 6 s; answer `435` matches `wc -l AGENTS.md` | | |
+| `--keys esc` while working | `idle` / `Stop` within 2 s; screen `Interrupted · What should Claude do instead?` | `idle` | unchanged |
+| `--keys ctrl+c` while working | same as Esc: `idle` / `Stop` within 2 s, `Interrupted` | `idle` | unchanged |
+| `--keys ctrl+c,ctrl+c` at idle | still `idle`: Claude showed an exit dialog (background shell still running) | `idle` | unchanged |
+| `--keys enter` on that dialog | `exited` ("the agent ended its own session") | terminal kept, `agent: null`, title = shell prompt; `terminals list` says `exited: false` (the shell lives on) | unchanged |
+| `terminals close` (agent idle inside) | `exited` ("the terminal was closed on purpose") | `terminals: []` | unchanged, workspace and worktree stay |
+| `terminals read` after close | error `Terminal session ... has ended`, exit 1 | | |
+| `workspaces archive` (live shell inside) | error `Workspace not found on host`, exit 1 | error `... is not on this host` | row gone; worktree folder deleted |
+
+### Findings for the adapter
+
+1. **Native state works with plain `workspaces create --agent claude`** once the hooks are in the
+   active config dir. `working` and `idle` arrived at the right moments for both crewmates.
+2. **Esc and a single Ctrl-C both interrupt a turn** and read as `idle` / `Stop`, same as a finished
+   turn. `because` does not tell them apart; an interrupted turn and a finished one look alike.
+3. **Esc on a running Bash tool call backgrounded the command** (`1 shell still running`). The
+   later double Ctrl-C then opened a "Exit and stop tasks / Move to background / Stay" dialog that
+   native state reported as `idle`, not `blocked`. So `idle` does not guarantee a free input box: a
+   non-permission dialog is invisible to native state. The watcher should still capture the screen
+   when a crewmate sits `idle` without reporting. Interrupt with one key, not `ctrl+c,ctrl+c`.
+4. **Agent exit leaves the terminal alive.** `agents create` runs Claude inside a shell, so after
+   exit `terminals list` says `exited: false`, `snapshot` shows `agent: null`, and only
+   `agents explain` says `exited`. Use `agents explain` (or `snapshot` `agent == null`) for "dead",
+   not `terminals list.exited`. Claude prints its `--resume <session>` id on exit.
+5. **Missing vs dead:** a closed terminal gives `explain: exited` (exit 0), a read error (exit 1).
+   An unknown terminal id in a live workspace gives `state: "none"` with exit 0, not an error. An
+   archived workspace gives exit 1 `Workspace not found on host` from every per-workspace call.
+   Map: `none` or workspace-not-found -> missing; `exited` -> dead.
+6. **Close vs archive:** `terminals close` kills the agent and the terminal only; the workspace,
+   tag and worktree stay and `list --tag` still shows it. `workspaces archive` removes everything,
+   including the worktree folder, with no warning even while a terminal is live, and drops the row
+   from `list --tag` and `snapshot`. The branch survives archive and must be deleted separately.
+7. **`snapshot` layout is empty** (`tabs: []`) for CLI-created workspaces nobody has opened in the
+   app. Liveness comes from `terminals`, not `layout`.
