@@ -35,6 +35,11 @@ proof on throwaway branches `spike/noprompt` and `spike/adopt` (both cleaned up)
    host service state (below), the Claude hook wiring Paradev relies on, or
    running nested inside another Claude session. See issue 03. Until this is
    understood, native state cannot be trusted as the watcher's only signal.
+   **Resolved (issue 03):** Paradev's Claude hooks live only in `~/.claude/settings.json`, but this
+   machine exports `CLAUDE_CONFIG_DIR=~/.claude-anthropic`, so the hooks never load. Launching Claude
+   with `--settings <hooks-only file>` gives all five states end to end, and sends submit. Filed
+   upstream as ParadevAI/Paradev#9724. A send right after `agents create` can still race the launch
+   command into the shell: wait for a state change before the first send.
 3. **`superset status` reported `running: false, stale: true`** while every other
    command (snapshot, create, send, archive) worked. Preflight must probe with a
    real cheap call (for example `superset projects list --local --json`) rather
@@ -65,7 +70,7 @@ proof on throwaway branches `spike/noprompt` and `spike/adopt` (both cleaned up)
 | spawn (A) | `worktrees open --local --project <id> --path <treehouse wt> --json`, `workspaces update <ws> --tag ...`, then `agents create` |
 | send | `terminals send --local --workspace <ws> --terminal <t> --text ...` / `--keys ...` |
 | capture/peek | `terminals read --local --workspace <ws> --terminal <t> --max-lines N --json` -> `.text` |
-| agent state | `agents explain ... --json` -> `.state` (map: working->busy, idle/blocked->idle, exited->dead, missing workspace/terminal->missing, starting->unknown); hash-poll fallback until issue 03 is resolved |
+| agent state | `agents explain ... --json` -> `.state` (map: working->busy, idle/blocked->idle, exited->dead, missing workspace/terminal->missing, starting->unknown); reliable once hooks load (issue 03); `starting` that lasts past launch means the hooks are missing, so report a setup error |
 | list-live | `workspaces list --local --tag <tag> --json` (+ `snapshot --json` for terminal liveness) |
 | teardown | after Firstmate landing checks: `terminals close`, then `workspaces archive <ws>` (B). Under A see issue 04 |
 | focus/open | `workspaces open <ws>` or deep link `superset://v2-workspace/<ws>?terminalId=<t>` |

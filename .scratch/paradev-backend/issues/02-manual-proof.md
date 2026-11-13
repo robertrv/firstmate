@@ -17,3 +17,5 @@ create a tagged workspace with a Claude agent and a real prompt, read its termin
 ## Comments
 
 2026-11-13: Shell-terminal half done (create, send, read, tag, archive). Agent half blocked by 03.
+
+2026-11-13: 03 resolved. Unblocked: launch Claude with Paradev's hooks loaded (see 03's comments; `--settings <hooks-only file>`) and wait for a state change before the first send.
