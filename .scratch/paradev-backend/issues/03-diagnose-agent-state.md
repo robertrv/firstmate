@@ -71,3 +71,5 @@ fall back to zellij-style hash polling as the main signal.
   not load. Report it as a setup error rather than silently polling screen hashes.
 - No local config was changed. Throwaway workspace `fm-spike-03a` (tag `fm-spike`) archived and its
   branch deleted.
+
+2026-11-13 (later): Local fix applied on the captain's machine. Only the `hooks` object from `~/.claude/settings.json` was merged into `~/.claude-anthropic/settings.json` (backup: `settings.json.bak-2026-11-13`; no other key changed). Verified: a fresh `workspaces create --agent claude` reported `idle` / `Stop` within 5s, `terminals send --wait --until settled` returned `submitted: true, state: idle`, `agents read` returned the transcript. Rejected alternative: adding the dir in Paradev's Usage tab, because provisioning copies the default (`~/.claude`, Bedrock) settings, `CLAUDE.md` and empty dirs into the profile. The copy drifts if Paradev changes its hook set; the symptom is `starting` / `Attached` again. Configuration details posted to https://github.com/ParadevAI/Paradev/issues/9724.
