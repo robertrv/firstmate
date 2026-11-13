@@ -1,6 +1,6 @@
 # 02 Manual proof: spawn, peek, steer, archive by hand
 
-Status: claimed
+Status: resolved
 Type: task
 Blocked by: 03
 
@@ -33,3 +33,5 @@ Also covered: Esc and a single Ctrl-C both interrupt a working turn and read as 
 Cleanup: `fm-spike-02a` and `fm-spike-02b` archived, branches `spike/02a` and `spike/02b` deleted (never pushed). No local Claude or Paradev configuration changed. No send was issued before an agent left `starting`.
 
 Status stays `claimed` until the sidebar check is confirmed.
+
+2026-11-13 (later): Captain confirmed `fm-spike-sidebar-check` shows in the Paradev sidebar under the `fm-spike` tag folder. All acceptance met. Workspace archived (worktree was clean), branch `spike/sidebar-check` deleted; `workspaces list --tag fm-spike` is now empty.
