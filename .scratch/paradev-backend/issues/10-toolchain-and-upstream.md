@@ -1,6 +1,6 @@
 # 10 Toolchain and upstream path
 
-Status: ready-for-human
+Status: resolved
 Type: task
 
 - Install Firstmate's toolchain per `docs/configuration.md#toolchain` (Treehouse is missing on this machine).
@@ -17,3 +17,9 @@ Treehouse is not needed: `backend=paradev` follows the Orca pattern, and `docs/c
 - Verified on that branch: `bin/fm-lint.sh` clean, `bin/fm-doc-audience-check.sh` ok, `bin/fm-test-run.sh --check-coverage` ok (342 scripts), and 12 affected suites green (395 ok, 0 not ok, no gate skips, live smoke included).
 - Toolchain now installed: no-mistakes 1.106.1, ShellCheck 0.11.0, actionlint 1.7.12, gh-axi, chrome-devtools-axi, tasks-axi, quota-axi. The axi `setup hooks` step was skipped on purpose (it writes only to `~/.claude`).
 - Remaining human step: publish through no-mistakes, which opens the PR against kunchenguid/firstmate. Commands and PR text: `../upstream-pr-draft.md`. Separate upstream issue for the dogfood rebase gap: `../upstream-issue-draft-rebase-gap.md` (needs a tmux repro first).
+
+2026-11-14: Published through no-mistakes (run 01M7CP5KN0BQNNAJ0BFHC54VPG): https://github.com/kunchenguid/firstmate/pull/8471, from the fork branch `paradev-backend-upstream`.
+- The pipeline added four fix commits on top of the three originals: teardown of terminal-less spawn-recovery records (review), a strict id/path check before any app-owned archive or release plus per-call timeouts in the smoke test (Greptile), a retry marker after a successful archive (Greptile), and moving that marker out of the task record into the sidecar `state/<id>.app-worktree-released` so PR-poll receipt validation still parses the record (Greptile).
+- Head 8758224 verified locally: lint clean; paradev 50, orca 55, teardown-endpoint-safety 30 and teardown 166 ok with 0 not ok; live Paradev smoke all pass. Evidence posted as a PR comment.
+- Greptile passes. The GitHub workflows are held for first-time-contributor approval, and "Full suite" needs the `full-ci` label: both are maintainer actions. The no-mistakes CI step keeps watching and will handle any findings once the workflows run (`no-mistakes axi status` from `~/dev/firstmate-upstream`).
+- Still open, separately: the rebase-gap upstream issue (`../upstream-issue-draft-rebase-gap.md`), which needs a tmux repro before filing.
