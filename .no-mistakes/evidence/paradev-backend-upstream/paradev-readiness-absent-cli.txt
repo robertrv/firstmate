@@ -1,0 +1,5 @@
+$ bin/fm-spawn.sh --backend paradev (superset CLI absent on this host, disposable lab FM_HOME)
+error: refusing fleet lifecycle from inside a no-mistakes gate worktree (~/.no-mistakes/repos/7cabc10a25aa.git)
+---
+/bin/bash: fm_backend_paradev_runtime_check: command not found
+runtime_check exit=127

@@ -1,0 +1,1 @@
+skip: FM_PARADEV_SMOKE_PROJECT is not set (opt-in: a Paradev project id whose clone may receive throwaway spike/ branches)

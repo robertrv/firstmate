@@ -1,0 +1,7 @@
+# Paradev explicit-only selection via real bin/fm-backend.sh (bash 3.2), disposable FM_HOME
+$ SUPERSET_WORKSPACE_ID=ws-123 (inside Paradev terminal, no opt-in)
+resolved=tmux detected=none
+$ FM_BACKEND=paradev
+resolved=paradev detected=none
+$ config/backend=paradev
+resolved=paradev detected=none

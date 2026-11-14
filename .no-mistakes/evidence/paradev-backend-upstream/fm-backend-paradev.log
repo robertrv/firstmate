@@ -1,0 +1,48 @@
+ok - fm_backend_paradev_runtime_check: probes a real cheap call, never superset status
+ok - fm_backend_paradev_runtime_check: refuses when the host cannot answer
+ok - fm_backend_paradev_tool_check: names a missing superset CLI
+ok - fm_backend_paradev_project_id: matches the canonical project path
+ok - fm_backend_paradev_project_id: refuses unregistered and ambiguous paths, never registers
+ok - fm_backend_paradev_worktree_create: one firstmate tag, exact branch, path read back by id
+ok - fm_backend_paradev_worktree_create: passes a recorded base branch
+ok - fm_backend_paradev_worktree_create: refuses to adopt an existing workspace and never archives it
+ok - fm_backend_paradev_worktree_create: archives its own pathless workspace
+ok - fm_backend_paradev_worktree_create: returns 2 with the created id when cleanup fails
+ok - fm_backend_paradev_terminal_create: returns workspace:terminal, refuses a reply without an id
+ok - fm_backend_paradev_capture: reads .text for the recorded workspace and terminal
+ok - fm_backend_paradev_capture: fails closed on CLI errors and malformed targets
+ok - fm_backend_paradev_send_key: Enter/Escape/C-c/C-u map to Paradev key names
+ok - fm_backend_paradev_send_key: refuses unsupported keys before any CLI call
+ok - fm_backend_paradev_send_literal/_send_text_line: stage vs submit
+ok - fm_backend_paradev_send_text_submit: types once, presses Enter, confirms through the shared composer classifier
+ok - fm_backend_paradev_send_text_submit: retries Enter only, never retypes
+ok - fm_backend_paradev_send_text_submit: reports send-failed on a CLI error
+ok - fm_backend_paradev_composer_state: a dead shell is unknown (unsafe for injection)
+ok - fm_backend_paradev_kill: closes and proves the terminal absent
+ok - fm_backend_paradev_kill: refuses while the terminal survives or cannot be proven gone
+ok - fm_backend_paradev_kill: an already-gone workspace is a quiet success
+ok - fm_backend_paradev_kill: a missing CLI is a failed close, not a gone endpoint
+ok - fm_backend_paradev_remove_worktree: archives only the exact recorded id and checks the result
+ok - fm_backend_paradev_worktree_path: resolves only the exact live workspace
+ok - fm_backend_paradev_busy_state: working=busy, idle, blocked; everything else unknown
+ok - fm_backend_paradev_target_ready: only a listed, unexited terminal is ready
+ok - fm-backend dispatcher: accepts paradev and routes primitives through bin/backends/paradev.sh
+ok - fm-spawn.sh --backend paradev: creates a tagged workspace, records ids, launches the harness in it
+ok - fm-spawn.sh --backend paradev --secondmate: refuses before any mutation
+ok - fm-spawn.sh --backend paradev: refuses before mutation when the host is unreachable
+ok - fm-spawn.sh --backend paradev: refuses an unregistered project before any mutation
+ok - fm-spawn.sh --backend paradev: refuses a non-isolated worktree and archives its own workspace
+ok - fm-spawn.sh --backend paradev: archives the workspace when the terminal cannot be opened
+ok - fm-spawn.sh --backend paradev: preserves a recovery record when abort cleanup fails
+ok - fm-spawn.sh --backend paradev: releases terminal and workspace on later aborts
+ok - fm-peek/fm-send/fm-crew-state route through backend=paradev metadata and its durable inbox
+ok - fm-teardown.sh backend=paradev: scout gate, then close and archive by recorded id
+ok - fm-teardown.sh backend=paradev: refuses an id/path mismatch before any close or archive
+ok - fm-teardown.sh backend=paradev: Firstmate's landing checks run before archive and refuse unlanded work
+ok - fm-teardown.sh backend=paradev: a landed ship with matching ids archives its workspace
+ok - fm-teardown.sh backend=paradev: ship teardown fails closed without an inspectable worktree
+ok - fm-teardown.sh backend=paradev: refuses a record with no recorded workspace id
+ok - fm-teardown.sh backend=paradev: terminal= must belong to the recorded workspace
+ok - fm-teardown.sh backend=paradev: a failed archive preserves the record
+ok - fm-teardown.sh backend=paradev: a terminal-less spawn recovery record tears down after the id/path gate
+ok - fm-teardown.sh backend=paradev: a terminal-less recovery record keeps the id/path and landing gates; ordinary records still refuse
