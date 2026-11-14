@@ -116,4 +116,12 @@ tests/fm-busy-state.test.sh
 tests/fm-teardown-endpoint-safety.test.sh
 ```
 
+The live smoke test `tests/fm-backend-paradev-smoke.test.sh` drives the real Paradev host and runs only when `FM_PARADEV_SMOKE_PROJECT` names a registered Paradev project on this machine; otherwise it records a gate skip:
+
+```sh
+FM_PARADEV_SMOKE_PROJECT=<project id> bin/fm-test-run.sh --family paradev
+```
+
+It creates two throwaway workspaces tagged `fm-spike` on `spike/` branches and removes them, by exact name and branch, even when it fails or is interrupted.
+
 [`verification/runtime-backends.md`](verification/runtime-backends.md#paradev) records the real CLI readiness, response shapes, and lifecycle facts the adapter relies on.

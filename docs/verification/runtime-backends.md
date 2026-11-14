@@ -2449,6 +2449,18 @@ FM_TEST_SUMMARY_FAMILY family=paradev count=1 duration_ms=68751 failed=0
 
 That 2026-11-14 run of `tests/fm-backend-paradev.test.sh` reported 46 ok cases against a keyed fake `superset`: readiness, project lookup, create and partial-create cleanup, refusal of an existing workspace, send and key mapping, capture and composer state, the proven close, exact-id archive, native busy mapping, metadata routing, and scout and ship teardown including id-path mismatch, missing ids, a terminal from another workspace, unlanded work, and a failed archive.
 `tests/fm-backend.test.sh` proves Paradev is never auto-detected from `SUPERSET_WORKSPACE_ID` while `FM_BACKEND=paradev` and `config/backend` select it.
+`tests/fm-backend-paradev-smoke.test.sh` is the opt-in real-binary smoke: it runs only with `FM_PARADEV_SMOKE_PROJECT` set to a registered Paradev project and otherwise records a gate skip, so CI runners, which have no Paradev host, skip it.
+A 2026-11-14 run against superset 2.0.8 passed both family scripts:
+
+```text
+FM_TEST_SUMMARY total=2 failed=0 skipped_gate=0 duration_ms=86111
+FM_TEST_SUMMARY_FAMILY family=paradev count=2 duration_ms=83936 failed=0
+```
+
+It proved, through the adapter primitives `fm-spawn.sh` and `fm-teardown.sh` call: two crewmates get distinct workspaces, branches, and worktrees that `worktree_path` reads back by id; a second create on a live crewmate's branch refuses and leaves it intact; a cross-workspace `terminal=` fails validation; each shell starts in its own worktree; `send_literal` stages without submitting and `send_key Enter` submits; dash-leading and `=` text arrive literally; `C-c` interrupts a foreground command and `Escape` and `C-u` are accepted; a plain shell reads busy state `unknown`; close is proved by the inventory re-read, keeps the worktree, and repeats safely; archive removes the folder and repeats as `notFound`; tearing one crewmate down leaves the other answering.
+A send issued right after `terminals create` reached the shell in each observed run, 3 to 4 seconds from create to output; that is an observation, not a guarantee for a slow shell start.
+Cleanup removed every smoke workspace and branch after an injected assertion failure and after `SIGTERM` with both crewmates live.
+It launches no agent, so Paradev's native `working` and `idle` states for a real harness are outside it.
 No real-binary smoke runs in CI.
 
 ## cmux
