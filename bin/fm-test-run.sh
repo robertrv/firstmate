@@ -440,7 +440,7 @@ family_for_basename() {
     fm-backend-orca.test.sh)
       printf '%s\n' orca
       ;;
-    fm-backend-paradev.test.sh)
+    fm-backend-paradev.test.sh|fm-backend-paradev-smoke.test.sh)
       printf '%s\n' paradev
       ;;
     fm-backend-tern.test.sh|fm-backend-tern-smoke.test.sh)
@@ -750,6 +750,7 @@ tests/fm-backend-hc-smoke.test.sh 3700
 tests/fm-backend-hc.test.sh 4000
 tests/fm-backend-orca.test.sh 27102
 tests/fm-backend-paradev.test.sh 21000
+tests/fm-backend-paradev-smoke.test.sh 40
 tests/fm-backend-paseo-smoke.test.sh 40
 tests/fm-backend-paseo.test.sh 8000
 tests/fm-backend-t3code-live-e2e.test.sh 51

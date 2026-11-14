@@ -1040,9 +1040,10 @@ test_paradev_family_selection() {
   printf '%s\n' "$families" | grep -qx paradev || fail "--list-families must name the paradev family"
   listed=$("$RUNNER" --list --family paradev)
   assert_contains "$listed" "tests/fm-backend-paradev.test.sh" "family paradev must select the fake-CLI suite"
+  assert_contains "$listed" "tests/fm-backend-paradev-smoke.test.sh" "family paradev must select the real-Paradev smoke test"
   assert_not_contains "$listed" "tests/fm-backend-orca.test.sh" "family paradev must not absorb the orca suite"
   "$RUNNER" --list-lanes >/dev/null || fail "--list-lanes failed with the paradev suite present"
-  pass "fm-test-run: family paradev selects the paradev suite, and the lane coverage guard accepts it"
+  pass "fm-test-run: family paradev selects the paradev suite and smoke test, and the lane coverage guard accepts them"
 }
 
 test_list_scheduled_proven_isolated_uses_serial_weights() {
